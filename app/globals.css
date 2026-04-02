@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --bg-main: #f3f4f5;
+  --bg-card: #ffffff;
+  --bg-bunny-dark: #04223e;
+  --text-strong: #243342;
+  --text-label: #939bad;
+  --text-info: #687a8b;
+  --sidebar-bg: #04223e;
+  --sidebar-text: #9ba7b2;
+  --sidebar-link-active: #cdd3d8;
+  --sidebar-border: #364e65;
+  --bg-success-strong: #2fc584;
+  --graph-blue: #5b9bd5;
+  --graph-blue-light: #b4d4f1;
+}
+
+@theme inline {
+  --color-bg-main: var(--bg-main);
+  --color-bg-card: var(--bg-card);
+  --color-bg-bunny-dark: var(--bg-bunny-dark);
+  --color-text-strong: var(--text-strong);
+  --color-text-label: var(--text-label);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-link-active: var(--sidebar-link-active);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-success: var(--bg-success-strong);
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-strong);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Card shadow */
+.card-shadow {
+  box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1), 0px 1px 1px 0px rgba(0,0,0,0.06), 0px 1px 1px 0px rgba(0,0,0,0.08);
+}
+
+/* Shimmer animation for encoding progress bars */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Global focus-visible styles for accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #1870c6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Sidebar-specific focus ring (light on dark) */
+aside a:focus-visible,
+aside button:focus-visible,
+aside input:focus-visible {
+  outline-color: #5b9bd5;
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
