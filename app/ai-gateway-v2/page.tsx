@@ -386,21 +386,16 @@ function OverviewV2({ onCreateKey, onGoToKeys, onGoToUsage }: { onCreateKey: () 
 
 // ── API Keys section ────────────────────────────────────────────────────────
 
-function KeysSection({ onCreateKey }: { onCreateKey: () => void }) {
+function KeysSection() {
   const activeKeys = mockKeys.filter(k => k.status === 'active');
 
   return (
     <div className="bg-white rounded-[10px] card-shadow">
-      <div className="px-[20px] py-[16px] flex items-center justify-between">
-        <div>
-          <h3 className="text-[14px] font-bold text-[#243342]">API Keys</h3>
-          <p className="text-[12px] text-[#687a8b]">
-            {activeKeys.length} active keys · {mockKeys.length - activeKeys.length} revoked
-          </p>
-        </div>
-        <Button variant="cta" size="sm" icon="fas fa-plus" onClick={onCreateKey}>
-          Create API Key
-        </Button>
+      <div className="px-[20px] py-[16px]">
+        <h3 className="text-[14px] font-bold text-[#243342]">API Keys</h3>
+        <p className="text-[12px] text-[#687a8b]">
+          {activeKeys.length} active keys · {mockKeys.length - activeKeys.length} revoked
+        </p>
       </div>
       <table className="w-full">
         <thead>
@@ -956,12 +951,12 @@ export default function AIGatewayV2Page() {
           </div>
         </div>
 
-        <div className="p-[24px]">
+        <div className="p-[24px] max-w-[1520px] mx-auto">
           {activeSection === 'overview' && keyStep === 'idle' && (
             <OverviewV2 onCreateKey={() => { setActiveSection('keys'); setKeyStep('form'); }} onGoToKeys={() => setActiveSection('keys')} onGoToUsage={() => setActiveSection('usage')} />
           )}
           {activeSection === 'keys' && keyStep === 'idle' && (
-            <KeysSection onCreateKey={() => setKeyStep('form')} />
+            <KeysSection />
           )}
           {keyStep === 'form' && (
             <CreateKeyFlow onDone={() => setKeyStep('idle')} />
