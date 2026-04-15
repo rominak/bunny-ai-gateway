@@ -1,7 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import FaIcon from '@/app/components/FaIcon';
+
+// ── API key definitions for filter ──────────────────────────────────────────
+
+type KeyFilter = 'all' | string;
+
+const apiKeys = [
+  { id: 'all', name: 'All keys', key: '' },
+  { id: 'prod',   name: 'Production App',       key: 'bny_sk_prod_****7f3a' },
+  { id: 'stage',  name: 'Staging',              key: 'bny_sk_stag_****2b1c' },
+  { id: 'dev',    name: 'Dev / Local',          key: 'bny_sk_dev_****9e4d' },
+  { id: 'ios',    name: 'Mobile App (iOS)',      key: 'bny_sk_mobi_****c3f1' },
+  { id: 'android',name: 'Mobile App (Android)', key: 'bny_sk_andr_****d4e2' },
+  { id: 'intl',   name: 'Internal Tools',       key: 'bny_sk_intl_****e5f3' },
+  { id: 'pipe',   name: 'Data Pipeline',        key: 'bny_sk_pipe_****f6a4' },
+  { id: 'qa',     name: 'QA Automation',        key: 'bny_sk_qa___****a7b5' },
+  { id: 'partner',name: 'Partner API',          key: 'bny_sk_part_****b8c6' },
+];
+
+const keyWeights: Record<string, number> = {
+  prod:    0.31,
+  stage:   0.055,
+  dev:     0.034,
+  ios:     0.108,
+  android: 0.099,
+  intl:    0.015,
+  pipe:    0.28,
+  qa:      0.006,
+  partner: 0.023,
+};
+
+function scaleData<T extends { value: number }>(data: T[], keyId: KeyFilter): T[] {
+  if (keyId === 'all') return data;
+  const w = keyWeights[keyId] ?? 0.1;
+  const jitter = [0.92, 1.06, 0.98, 1.03, 0.95, 1.08, 0.97, 1.01, 0.94, 1.05, 0.99, 1.02];
+  return data.map((d, i) => ({ ...d, value: Math.round(d.value * w * (jitter[i % jitter.length])) }));
+}
+
+function scaleLatency(data: { label: string; p50: number; p95: number; p99: number }[], keyId: KeyFilter) {
+  if (keyId === 'all') return data;
+  const latencyOffsets: Record<string, number> = {
+    prod: 1.0, stage: 1.12, dev: 1.25, ios: 1.18, android: 1.2,
+    intl: 0.85, pipe: 0.72, qa: 1.3, partner: 1.1,
+  };
+  const m = latencyOffsets[keyId] ?? 1.0;
+  return data.map(d => ({
+    label: d.label,
+    p50: Math.round(d.p50 * m),
+    p95: Math.round(d.p95 * m),
+    p99: Math.round(d.p99 * m),
+  }));
+}
 
 // Mock data
 const timeRanges = ['24h', '7d', '30d', '90d'] as const;
@@ -425,15 +476,95 @@ function DonutChart({ segments }: { segments: { pct: number; color: string }[] }
   );
 }
 
+function KeyFilterDropdown({ value, onChange }: { value: KeyFilter; onChange: (v: KeyFilter) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selected = apiKeys.find(k => k.id === value) ?? apiKeys[0];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-[8px] h-[34px] pl-[10px] pr-[8px] rounded-[8px] text-[12px] font-medium transition-colors border ${
+          value !== 'all'
+            ? 'bg-[#eef4fe] border-[#1870c6]/30 text-[#1870c6]'
+            : 'bg-white border-[#e6e9ec] text-[#243342] hover:border-[#c4cdd5]'
+        }`}
+      >
+        <FaIcon icon="fas fa-key" className="text-[10px] text-[#9ba7b2]" ariaLabel="" />
+        <span className="max-w-[140px] truncate">{selected.name}</span>
+        <FaIcon icon="fas fa-chevron-down" className={`text-[9px] transition-transform ${open ? 'rotate-180' : ''} ${value !== 'all' ? 'text-[#1870c6]' : 'text-[#9ba7b2]'}`} ariaLabel="" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-[40px] w-[240px] bg-white rounded-[10px] card-shadow border border-[#e6e9ec] py-[6px] z-50">
+          {apiKeys.map((k) => (
+            <button
+              key={k.id}
+              onClick={() => { onChange(k.id); setOpen(false); }}
+              className={`w-full px-[14px] py-[8px] flex items-center gap-[10px] text-left transition-colors ${
+                value === k.id ? 'bg-[#eef4fe]' : 'hover:bg-[#fafbfc]'
+              }`}
+            >
+              <span className={`w-[6px] h-[6px] rounded-full flex-shrink-0 ${k.id === 'all' ? 'bg-[#9ba7b2]' : 'bg-[#16a34a]'}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-[13px] truncate ${value === k.id ? 'font-medium text-[#1870c6]' : 'text-[#243342]'}`}>{k.name}</p>
+                {k.key && <p className="text-[10px] text-[#9ba7b2] font-mono truncate">{k.key}</p>}
+              </div>
+              {value === k.id && <FaIcon icon="fas fa-check" className="text-[11px] text-[#1870c6] flex-shrink-0" ariaLabel="" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function UsageSection() {
   const [range, setRange] = useState<TimeRange>('7d');
+  const [keyFilter, setKeyFilter] = useState<KeyFilter>('all');
 
-  const cards = summaryCards[range];
+  const cards = summaryCards[range].map(c => {
+    if (keyFilter === 'all') return c;
+    const w = keyWeights[keyFilter] ?? 0.1;
+    if (c.label === 'Avg latency') {
+      const latencyOffsets: Record<string, number> = {
+        prod: 1.0, stage: 1.12, dev: 1.25, ios: 1.18, android: 1.2,
+        intl: 0.85, pipe: 0.72, qa: 1.3, partner: 1.1,
+      };
+      const m = latencyOffsets[keyFilter] ?? 1.0;
+      const base = parseInt(c.value);
+      return { ...c, value: `${Math.round(base * m)}ms` };
+    }
+    const raw = c.value.replace(/[,$%]/g, '');
+    const hasM = c.value.includes('M');
+    const hasK = c.value.includes('K');
+    const hasDollar = c.value.startsWith('$');
+    let num = parseFloat(raw);
+    if (hasM) num *= 1000000;
+    else if (hasK) num *= 1000;
+    const scaled = num * w;
+    let formatted: string;
+    if (scaled >= 1000000) formatted = `${(scaled / 1000000).toFixed(2)}M`;
+    else if (scaled >= 1000) formatted = `${(scaled / 1000).toFixed(1)}K`;
+    else formatted = String(Math.round(scaled));
+    if (hasDollar) formatted = `$${formatted}`;
+    return { ...c, value: formatted };
+  });
 
   return (
     <>
-      {/* Time range selector */}
-      <div className="flex items-center justify-end mb-[20px]">
+      {/* Filters row */}
+      <div className="flex items-center justify-end gap-[10px] mb-[20px]">
+        <KeyFilterDropdown value={keyFilter} onChange={setKeyFilter} />
         <div className="flex items-center gap-[4px] bg-white rounded-[8px] card-shadow p-[4px]">
           {timeRanges.map((r) => (
             <button
@@ -448,6 +579,23 @@ export default function UsageSection() {
           ))}
         </div>
       </div>
+
+      {/* Active filter indicator */}
+      {keyFilter !== 'all' && (
+        <div className="flex items-center gap-[10px] mb-[16px] px-[14px] py-[10px] bg-[#eef4fe] border border-[#1870c6]/20 rounded-[10px]">
+          <FaIcon icon="fas fa-filter" className="text-[11px] text-[#1870c6]" ariaLabel="" />
+          <p className="text-[12px] text-[#1870c6]">
+            Filtered by <span className="font-semibold">{apiKeys.find(k => k.id === keyFilter)?.name}</span>
+          </p>
+          <button
+            onClick={() => setKeyFilter('all')}
+            className="ml-auto text-[11px] text-[#1870c6] hover:underline flex items-center gap-[4px]"
+          >
+            <FaIcon icon="fas fa-xmark" className="text-[10px]" ariaLabel="" />
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-4 gap-[12px] mb-[20px]">
@@ -475,7 +623,7 @@ export default function UsageSection() {
           <h3 className="text-[14px] font-bold text-[#243342] mb-[2px]">Request volume</h3>
           <p className="text-[12px] text-[#687a8b] mb-[12px]">Total requests per {range === '24h' ? 'hour' : range === '90d' ? 'month' : 'day'}</p>
           <AreaChart
-            data={requestVolumeData[range]}
+            data={scaleData(requestVolumeData[range], keyFilter)}
             color="#1870c6"
             format={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${Math.round(v / 1000)}K`}
           />
@@ -485,7 +633,7 @@ export default function UsageSection() {
           <h3 className="text-[14px] font-bold text-[#243342] mb-[2px]">Daily spend</h3>
           <p className="text-[12px] text-[#687a8b] mb-[12px]">Cost across all providers</p>
           <AreaChart
-            data={spendData[range]}
+            data={scaleData(spendData[range], keyFilter)}
             color="#16a34a"
             format={(v) => v >= 1000 ? `$${(v / 1000).toFixed(1)}K` : `$${v}`}
           />
@@ -513,7 +661,7 @@ export default function UsageSection() {
             </div>
           </div>
           <MultiLineChart
-            data={latencyPercentiles[range].map(d => ({ label: d.label, p50: d.p50, p95: d.p95, p99: d.p99 }))}
+            data={scaleLatency(latencyPercentiles[range], keyFilter).map(d => ({ label: d.label, p50: d.p50, p95: d.p95, p99: d.p99 }))}
             colors={['#1870c6', '#f59e0b', '#ef4444']}
             labels={['p50', 'p95', 'p99']}
             format={(v) => `${v}ms`}
@@ -524,7 +672,10 @@ export default function UsageSection() {
           <h3 className="text-[14px] font-bold text-[#243342] mb-[2px]">Cache hit rate</h3>
           <p className="text-[12px] text-[#687a8b] mb-[12px]">Percentage of requests served from cache</p>
           <AreaChart
-            data={cacheHitData[range]}
+            data={keyFilter === 'all' ? cacheHitData[range] : cacheHitData[range].map((d, i) => {
+              const offsets: Record<string, number> = { prod: 2, stage: -3, dev: -8, ios: 5, android: 4, intl: -2, pipe: 12, qa: -10, partner: 1 };
+              return { ...d, value: Math.max(0, Math.min(100, d.value + (offsets[keyFilter] ?? 0) + (i % 2 === 0 ? 2 : -1))) };
+            })}
             color="#f59e0b"
             format={(v) => `${v}%`}
           />
