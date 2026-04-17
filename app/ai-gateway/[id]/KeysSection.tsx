@@ -61,17 +61,13 @@ export default function KeysSection({ step, onStepChange }: { step: Step; onStep
   if (step === 'reveal') {
     return (
       <div className="max-w-[640px]">
-        {/* Header */}
-        <div className="flex items-center gap-[12px] mb-[28px]">
-          <div className="w-[44px] h-[44px] rounded-full bg-[#eef4fe] flex items-center justify-center flex-shrink-0">
-            <FaIcon icon="fas fa-key" className="text-[20px] text-[#1870c6]" ariaLabel="API key" />
-          </div>
-          <div>
-            <h2 className="text-[18px] font-semibold text-[#243342]">Your API key is ready</h2>
-            <p className="text-[13px] text-[#687a8b]">
-              Key created for <span className="font-medium text-[#243342]">{keyName}</span>
-            </p>
-          </div>
+        {/* Success alert */}
+        <div className="bg-[#f2faf5] border border-[#c8ead6] rounded-[8px] px-[15px] py-[10px] mb-[20px] flex items-center gap-[10px]">
+          <FaIcon icon="fas fa-circle-check" className="text-[12px] text-[#2fc584] flex-shrink-0" ariaLabel="Success" />
+          <p className="text-[14px] leading-[18px] text-[#243342]">
+            <span className="font-semibold">API key was successfully created</span>{' '}
+            Your API key <span className="font-medium">{keyName}</span> has been successfully created and is ready for use.
+          </p>
         </div>
 
         {/* Warning banner */}
