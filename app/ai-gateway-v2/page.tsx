@@ -683,9 +683,9 @@ console.log(response.choices[0].message.tool_calls);`,
               </span>
               <button
                 onClick={() => { navigator.clipboard.writeText(`BUNNY_AI_KEY=${revealedKey}`).catch(() => {}); }}
-                className="flex items-center gap-[5px] text-[12px] text-[#1870c6] hover:underline"
+                className="flex items-center gap-[6px] h-[32px] px-[12px] rounded-[6px] text-[12px] font-medium transition-colors flex-shrink-0 bg-[#eef4fe] text-[#1870c6] border border-[#eef4fe] hover:bg-[#dbeafe]"
               >
-                <FaIcon icon="fas fa-copy" className="text-[10px]" ariaLabel="Copy" />
+                <FaIcon icon="fas fa-copy" className="text-[11px]" ariaLabel="Copy" />
                 Copy
               </button>
             </div>
