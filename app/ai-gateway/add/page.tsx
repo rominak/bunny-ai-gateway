@@ -48,7 +48,7 @@ function SuccessScreen({ name, budgetEnabled, budget, cacheEnabled, onAddAnother
   -d '{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"Hello!"}]}'`;
 
   return (
-    <div className="w-full max-w-[820px] mx-auto">
+    <div className="w-full max-w-[960px] mx-auto">
       <div className="flex items-center gap-[8px] mb-[20px] text-[13px]">
         <Link href="/ai-gateway" className="text-[#1870c6] hover:underline">AI Gateway</Link>
         <FaIcon icon="fas fa-chevron-right" className="text-[10px] text-[#9ba7b2]" ariaLabel="" />
@@ -182,7 +182,7 @@ function FlowV1() {
   }
 
   return (
-    <div className="w-full max-w-[820px] mx-auto">
+    <div className="w-full max-w-[960px] mx-auto">
       <Link href="/ai-gateway" className="flex items-center gap-[8px] text-[13px] text-[#687a8b] hover:text-[#243342] mb-[20px] transition-colors">
         <FaIcon icon="fas fa-arrow-left" className="text-[12px]" ariaLabel="Back" />
         AI Gateway
@@ -323,7 +323,7 @@ function FlowV2() {
   }
 
   return (
-    <div className="w-full max-w-[480px]">
+    <div className="w-full max-w-[960px] mx-auto">
       <Link href="/ai-gateway" className="flex items-center gap-[8px] text-[13px] text-[#687a8b] hover:text-[#243342] mb-[32px] transition-colors">
         <FaIcon icon="fas fa-arrow-left" className="text-[12px]" ariaLabel="Back" />
         AI Gateway
