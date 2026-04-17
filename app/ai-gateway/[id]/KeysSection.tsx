@@ -25,6 +25,8 @@ export default function KeysSection({ step, onStepChange }: { step: Step; onStep
   const setStep = onStepChange;
   const [keyName, setKeyName] = useState('');
   const [keyBudget, setKeyBudget] = useState('');
+  const [budgetEnabled, setBudgetEnabled] = useState(false);
+  const [euOnly, setEuOnly] = useState(false);
   const [revealedKey, setRevealedKey] = useState('');
   const [copied, setCopied] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -48,6 +50,8 @@ export default function KeysSection({ step, onStepChange }: { step: Step; onStep
     setStep('idle');
     setKeyName('');
     setKeyBudget('');
+    setBudgetEnabled(false);
+    setEuOnly(false);
     setRevealedKey('');
     setCopied(false);
     setConfirmed(false);
@@ -150,62 +154,108 @@ curl https://gateway.b-cdn.net/v1/chat/completions \\
   }
 
   // ── Create form ─────────────────────────────────────────────────────────────
-  return (
-    <>
-
-      {step === 'form' && (
-        <div className="bg-white rounded-[10px] card-shadow p-[24px] mb-[20px]">
-          <h3 className="text-[16px] font-semibold text-[#243342] mb-[4px]">New API key</h3>
-          <p className="text-[13px] text-[#687a8b] mb-[20px]">
-            The full key is shown <span className="font-medium text-[#243342]">once only</span> after creation.
+  if (step === 'form') {
+    return (
+      <div className="max-w-[960px] mx-auto py-[20px]">
+        <div className="mb-[28px]">
+          <h1 className="text-[24px] font-semibold text-[#ff6b35] mb-[8px]">Create API key</h1>
+          <p className="text-[14px] text-[#687a8b] leading-[1.6] max-w-[560px]">
+            API keys authenticate your requests to the AI Gateway endpoint.
           </p>
+        </div>
 
-          <div className="max-w-[480px] space-y-[16px]">
-            {/* Name */}
+        {/* Key details */}
+        <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[20px]">
+          <h2 className="text-[16px] font-semibold text-[#243342] mb-[20px]">Key details</h2>
+          <label className="block text-[13px] font-medium text-[#243342] mb-[6px]">
+            Key name <span className="text-[#ff6b35]">*</span>
+          </label>
+          <input
+            type="text"
+            value={keyName}
+            onChange={(e) => setKeyName(e.target.value)}
+            placeholder="e.g. Production App"
+            className="w-full h-[40px] px-[12px] text-[14px] text-[#243342] border border-[#e6e9ec] rounded-[8px] outline-none focus:border-[#1870c6] placeholder:text-[#9ba7b2]"
+          />
+        </div>
+
+        {/* Monthly spend limit */}
+        <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[20px]">
+          <div className="flex items-start justify-between mb-[4px]">
             <div>
-              <label className="block text-[12px] font-medium text-[#243342] mb-[6px]">
-                Key name <span className="text-[#dc2626]">*</span>
-              </label>
-              <input
-                type="text"
-                value={keyName}
-                onChange={(e) => setKeyName(e.target.value)}
-                placeholder="e.g. Production App, Staging, My Agent"
-                className="w-full h-[40px] px-[12px] text-[14px] text-[#243342] border border-[#cdd3d8] rounded-[8px] outline-none focus:border-[#1870c6] transition-colors placeholder:text-[#9ba7b2]"
-              />
+              <h2 className="text-[16px] font-semibold text-[#243342]">Monthly spend limit</h2>
+              <p className="text-[13px] text-[#687a8b] mt-[4px]">Traffic for this key will pause automatically when the monthly limit is reached.</p>
             </div>
-
-            {/* Budget */}
-            <div>
-              <label className="block text-[12px] font-medium text-[#243342] mb-[6px]">
-                Monthly budget <span className="text-[#9ba7b2] font-normal">(optional)</span>
+            <button
+              type="button"
+              onClick={() => setBudgetEnabled(!budgetEnabled)}
+              style={{ background: budgetEnabled ? '#1870c6' : '#c4cdd5' }}
+              className="relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 focus:outline-none"
+            >
+              <span
+                style={{ left: budgetEnabled ? '23px' : '3px' }}
+                className="absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-all duration-200"
+              />
+            </button>
+          </div>
+          {budgetEnabled && (
+            <div className="mt-[16px] pt-[16px] border-t border-[#f3f4f5]">
+              <label className="block text-[13px] font-medium text-[#243342] mb-[6px]">
+                Budget (USD / month)
               </label>
-              <div className="flex items-center border border-[#cdd3d8] rounded-[8px] overflow-hidden focus-within:border-[#1870c6] transition-colors">
-                <span className="px-[12px] py-[8px] bg-[#f3f4f5] text-[14px] text-[#687a8b] border-r border-[#cdd3d8]">$</span>
+              <div className="relative">
+                <span className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[14px] text-[#9ba7b2]">$</span>
                 <input
-                  type="number"
+                  type="text"
                   value={keyBudget}
                   onChange={(e) => setKeyBudget(e.target.value)}
-                  placeholder="No limit"
-                  className="flex-1 h-[40px] px-[12px] text-[14px] text-[#243342] outline-none placeholder:text-[#9ba7b2]"
+                  placeholder="500"
+                  className="w-full h-[40px] pl-[28px] pr-[12px] text-[14px] text-[#243342] border border-[#e6e9ec] rounded-[8px] outline-none focus:border-[#1870c6] placeholder:text-[#9ba7b2]"
                 />
-                <span className="px-[12px] text-[13px] text-[#9ba7b2]">/ month</span>
               </div>
-              <p className="text-[11px] text-[#9ba7b2] mt-[4px]">Requests will be rejected when this key's budget is reached</p>
+              <p className="text-[12px] text-[#9ba7b2] mt-[6px]">Traffic will pause once this amount is reached</p>
             </div>
+          )}
+        </div>
 
-            <div className="flex items-center gap-[8px] pt-[4px]">
-              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!keyName.trim()}>
-                Create key
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setStep('idle')}>
-                Cancel
-              </Button>
+        {/* EU-only routing */}
+        <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[24px]">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-[10px]">
+              <span className="text-[18px] mt-[1px]">🇪🇺</span>
+              <div>
+                <h2 className="text-[16px] font-semibold text-[#243342]">EU-only routing</h2>
+                <p className="text-[13px] text-[#687a8b] mt-[4px] max-w-[500px]">Route all requests through European infrastructure only. Ensures GDPR-compliant data processing.</p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setEuOnly(!euOnly)}
+              style={{ background: euOnly ? '#1870c6' : '#c4cdd5' }}
+              className="relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 focus:outline-none"
+            >
+              <span
+                style={{ left: euOnly ? '23px' : '3px' }}
+                className="absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-all duration-200"
+              />
+            </button>
           </div>
         </div>
-      )}
 
+        <div className="flex items-center justify-end gap-[12px]">
+          <Button variant="outline" onClick={() => setStep('idle')}>
+            Cancel
+          </Button>
+          <Button variant="cta" disabled={!keyName.trim()} onClick={handleCreate}>
+            Create key
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
       {/* Keys table */}
       <div className="bg-white rounded-[10px] card-shadow">
         <div className="px-[20px] py-[16px] border-b border-[#f3f4f5]">

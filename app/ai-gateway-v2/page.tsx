@@ -452,6 +452,7 @@ function KeysSection() {
 function CreateKeyFlow({ onDone }: { onDone: () => void }) {
   const [keyName, setKeyName] = useState('');
   const [keyBudget, setKeyBudget] = useState('');
+  const [budgetEnabled, setBudgetEnabled] = useState(false);
   const [euOnly, setEuOnly] = useState(false);
   const [step, setStep] = useState<'form' | 'reveal'>('form');
   const [revealedKey, setRevealedKey] = useState('');
@@ -637,22 +638,36 @@ console.log(response.choices[0].message.tool_calls);`,
     const snippets = getSnippets(revealedKey);
 
     return (
-      <div className="max-w-[900px] mx-auto py-[20px]">
-        {/* Success header */}
-        <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[16px]">
-          <div className="flex items-center gap-[12px] mb-[16px]">
-            <div className="w-[40px] h-[40px] rounded-full bg-[#f0fdf4] flex items-center justify-center">
-              <FaIcon icon="fas fa-circle-check" className="text-[20px] text-[#16a34a]" ariaLabel="Success" />
+      <div className="max-w-[960px] mx-auto py-[20px]">
+        {/* Header */}
+        <div className="mb-[28px]">
+          <div className="flex items-center gap-[10px] mb-[8px]">
+            <div className="w-[32px] h-[32px] rounded-full bg-[#f0fdf4] flex items-center justify-center">
+              <FaIcon icon="fas fa-check" className="text-[13px] text-[#16a34a]" ariaLabel="Success" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-[18px] font-semibold text-[#243342]">API key created</h2>
-              <p className="text-[13px] text-[#687a8b]">{keyName}</p>
-            </div>
+            <h1 className="text-[24px] font-semibold text-[#243342]">Your API key is ready</h1>
           </div>
+          <p className="text-[14px] text-[#687a8b] leading-[1.6] max-w-[620px]">
+            Key created for <span className="font-medium text-[#243342]">{keyName}</span>. Copy it now — for security reasons, it won't be shown again.
+          </p>
+        </div>
 
-          <div className="bg-[#fffbeb] border border-[#fde68a] rounded-[8px] px-[14px] py-[10px] mb-[16px] flex items-center gap-[10px]">
-            <FaIcon icon="fas fa-triangle-exclamation" className="text-[13px] text-[#d97706] flex-shrink-0" ariaLabel="Warning" />
-            <p className="text-[12px] text-[#92400e]">This key will not be shown again. Copy it now and store it securely.</p>
+        {/* API key + .env */}
+        <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[20px]">
+          <div className="flex items-start justify-between mb-[16px]">
+            <div>
+              <h2 className="text-[16px] font-semibold text-[#243342]">API key</h2>
+              <p className="text-[13px] text-[#687a8b] mt-[4px]">Store this somewhere secure — password manager, env variable, or secrets vault.</p>
+            </div>
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-[6px] h-[32px] px-[12px] rounded-[6px] text-[12px] font-medium transition-colors flex-shrink-0 ${
+                copied ? 'bg-[#f0fdf4] text-[#16a34a] border border-[#86efac]' : 'bg-[#eef4fe] text-[#1870c6] border border-[#eef4fe] hover:bg-[#dbeafe]'
+              }`}
+            >
+              <FaIcon icon={copied ? 'fas fa-check' : 'fas fa-copy'} className="text-[11px]" ariaLabel="Copy" />
+              {copied ? 'Copied' : 'Copy'}
+            </button>
           </div>
 
           <div className="relative">
@@ -660,82 +675,74 @@ console.log(response.choices[0].message.tool_calls);`,
               type="text"
               readOnly
               value={revealedKey}
-              className="w-full h-[44px] px-[14px] pr-[44px] text-[13px] text-[#243342] font-mono bg-[#f3f4f5] border border-[#e6e9ec] rounded-[8px] outline-none cursor-text"
+              className="w-full h-[44px] px-[14px] text-[13px] text-[#243342] font-mono bg-[#f8f9fa] border border-[#e6e9ec] rounded-[8px] outline-none cursor-text"
               onClick={(e) => (e.target as HTMLInputElement).select()}
             />
-            <button
-              onClick={handleCopy}
-              className="absolute right-[1px] top-[1px] h-[42px] w-[42px] flex items-center justify-center rounded-r-[7px] hover:bg-[#e6e9ec] transition-colors"
-            >
-              <FaIcon icon={copied ? 'fas fa-check' : 'fas fa-copy'} className={`text-[13px] ${copied ? 'text-[#16a34a]' : 'text-[#687a8b]'}`} ariaLabel="Copy" />
-            </button>
           </div>
 
-          {/* .env hint */}
-          <div className="mt-[12px] flex items-center gap-[8px]">
-            <span className="text-[12px] text-[#687a8b]">Add to your <code className="text-[12px] font-mono text-[#243342] bg-[#f3f4f5] px-[6px] py-[2px] rounded-[4px]">.env</code> file:</span>
-          </div>
-          <div className="relative mt-[6px]">
+          <div className="mt-[16px] pt-[16px] border-t border-[#f3f4f5]">
+            <div className="flex items-center justify-between mb-[8px]">
+              <span className="text-[12px] text-[#687a8b]">
+                Paste into your <code className="text-[12px] font-mono text-[#243342] bg-[#f3f4f5] px-[6px] py-[2px] rounded-[4px]">.env</code> file
+              </span>
+              <button
+                onClick={() => { navigator.clipboard.writeText(`BUNNY_AI_KEY=${revealedKey}`).catch(() => {}); }}
+                className="flex items-center gap-[5px] text-[12px] text-[#1870c6] hover:underline"
+              >
+                <FaIcon icon="fas fa-copy" className="text-[10px]" ariaLabel="Copy" />
+                Copy
+              </button>
+            </div>
             <input
               type="text"
               readOnly
               value={`BUNNY_AI_KEY=${revealedKey}`}
-              className="w-full h-[40px] px-[14px] pr-[44px] text-[12px] text-[#243342] font-mono bg-[#f3f4f5] border border-[#e6e9ec] rounded-[8px] outline-none cursor-text"
+              className="w-full h-[38px] px-[14px] text-[12px] text-[#243342] font-mono bg-[#f8f9fa] border border-[#e6e9ec] rounded-[8px] outline-none cursor-text"
               onClick={(e) => (e.target as HTMLInputElement).select()}
             />
-            <button
-              onClick={() => { navigator.clipboard.writeText(`BUNNY_AI_KEY=${revealedKey}`).catch(() => {}); }}
-              className="absolute right-[1px] top-[1px] h-[38px] w-[42px] flex items-center justify-center rounded-r-[7px] hover:bg-[#e6e9ec] transition-colors"
-            >
-              <FaIcon icon="fas fa-copy" className="text-[12px] text-[#687a8b]" ariaLabel="Copy" />
-            </button>
           </div>
         </div>
 
-        {/* Ready-to-use code snippets */}
-        <div className="bg-white rounded-[12px] card-shadow overflow-hidden mb-[16px]">
-          <div className="px-[24px] py-[16px] border-b border-[#f3f4f5] flex items-center gap-[10px]">
-            <div className="w-[28px] h-[28px] rounded-[6px] bg-[#eef4fe] flex items-center justify-center">
-              <FaIcon icon="fas fa-rocket" className="text-[12px] text-[#1870c6]" ariaLabel="Quick start" />
-            </div>
+        {/* Quick start */}
+        <div className="bg-white rounded-[12px] card-shadow overflow-hidden mb-[24px]">
+          <div className="px-[24px] py-[18px] border-b border-[#f3f4f5] flex items-start justify-between gap-[16px]">
             <div>
-              <h3 className="text-[14px] font-bold text-[#243342]">Quick start</h3>
-              <p className="text-[12px] text-[#687a8b]">Your API key is already filled in. Just copy, paste, and run.</p>
+              <h2 className="text-[16px] font-semibold text-[#243342]">Quick start</h2>
+              <p className="text-[13px] text-[#687a8b] mt-[4px]">Your API key is already filled in — copy, paste, and run.</p>
+            </div>
+            <div className="flex items-center gap-[4px] flex-shrink-0">
+              {([
+                { id: 'basic' as UseCase, label: 'Basic' },
+                { id: 'streaming' as UseCase, label: 'Streaming' },
+                { id: 'tools' as UseCase, label: 'Function calling' },
+              ]).map((uc) => (
+                <button
+                  key={uc.id}
+                  onClick={() => { setUseCase(uc.id); setSnippetCopied(false); }}
+                  className={`h-[30px] px-[12px] rounded-[6px] text-[12px] font-medium transition-colors ${
+                    useCase === uc.id
+                      ? 'bg-[#eef4fe] text-[#1870c6]'
+                      : 'text-[#687a8b] hover:bg-[#f3f4f5] hover:text-[#243342]'
+                  }`}
+                >
+                  {uc.label}
+                </button>
+              ))}
             </div>
           </div>
-          {/* Use case tabs */}
-          <div className="px-[24px] py-[10px] border-b border-[#f3f4f5] flex items-center gap-[6px]">
-            {([
-              { id: 'basic' as UseCase, label: 'Basic', icon: 'fas fa-play' },
-              { id: 'streaming' as UseCase, label: 'Streaming', icon: 'fas fa-bars-staggered' },
-              { id: 'tools' as UseCase, label: 'Function calling', icon: 'fas fa-wrench' },
-            ]).map((uc) => (
-              <button
-                key={uc.id}
-                onClick={() => { setUseCase(uc.id); setSnippetCopied(false); }}
-                className={`flex items-center gap-[6px] px-[12px] py-[6px] rounded-[6px] text-[12px] font-medium transition-colors ${
-                  useCase === uc.id
-                    ? 'bg-[#eef4fe] text-[#1870c6]'
-                    : 'text-[#687a8b] hover:bg-[#f3f4f5] hover:text-[#243342]'
-                }`}
-              >
-                <FaIcon icon={uc.icon} className="text-[10px]" ariaLabel="" />
-                {uc.label}
-              </button>
-            ))}
-          </div>
-          {/* Code block */}
-          <div className="bg-[#04223e] rounded-b-[12px]">
-            <div className="flex items-center justify-between px-[16px] pt-[12px]">
+
+          {/* Code block with window chrome */}
+          <div className="bg-[#04223e]">
+            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#0f2e4d]">
               <div className="flex items-center gap-[2px]">
                 {(['curl', 'python', 'node'] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => { setLang(tab); setSnippetCopied(false); }}
-                    className={`px-[12px] py-[6px] rounded-[6px] text-[12px] font-medium transition-colors ${
+                    className={`px-[10px] py-[5px] rounded-[5px] text-[11px] font-medium transition-colors ${
                       lang === tab
                         ? 'bg-[#1a3a54] text-white'
-                        : 'text-[#687a8b] hover:text-[#8899a8]'
+                        : 'text-[#8899a8] hover:text-white'
                     }`}
                   >
                     {tab === 'curl' ? 'cURL' : tab === 'python' ? 'Python' : 'Node.js'}
@@ -744,27 +751,32 @@ console.log(response.choices[0].message.tool_calls);`,
               </div>
               <button
                 onClick={handleCopySnippet}
-                className={`flex items-center gap-[5px] text-[12px] transition-colors ${
-                  snippetCopied ? 'text-[#4ade80]' : 'text-[#687a8b] hover:text-white'
+                className={`flex items-center gap-[6px] h-[26px] px-[10px] rounded-[5px] text-[11px] font-medium transition-colors ${
+                  snippetCopied ? 'bg-[#16a34a]/20 text-[#4ade80]' : 'bg-[#1a3a54] text-[#8899a8] hover:bg-[#243d52] hover:text-white'
                 }`}
               >
-                <FaIcon icon={snippetCopied ? 'fas fa-check' : 'fas fa-copy'} className="text-[11px]" ariaLabel="Copy" />
+                <FaIcon icon={snippetCopied ? 'fas fa-check' : 'fas fa-copy'} className="text-[10px]" ariaLabel="Copy" />
                 {snippetCopied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <pre className="px-[16px] py-[14px] text-[12px] text-[#e2e8f0] font-mono whitespace-pre overflow-x-auto leading-[1.7] h-[260px]">
+            <pre className="px-[18px] py-[16px] text-[12px] text-[#e2e8f0] font-mono whitespace-pre overflow-auto leading-[1.7] max-h-[320px]">
               {snippets[useCase][lang]}
             </pre>
           </div>
         </div>
 
-        {/* Confirm + Done */}
-        <div className="bg-white rounded-[12px] card-shadow p-[24px]">
-          <label className="flex items-start gap-[8px] mb-[16px] cursor-pointer">
-            <input type="checkbox" checked={confirmed} onChange={() => setConfirmed(!confirmed)} className="mt-[3px] accent-[#1870c6]" />
-            <span className="text-[13px] text-[#687a8b]">I have copied my API key and stored it securely</span>
+        {/* Footer: confirm + done */}
+        <div className="flex items-center justify-between gap-[16px]">
+          <label className="flex items-center gap-[10px] cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={() => setConfirmed(!confirmed)}
+              className="w-[16px] h-[16px] accent-[#1870c6] cursor-pointer"
+            />
+            <span className="text-[13px] text-[#243342]">I have copied my API key and stored it securely</span>
           </label>
-          <Button variant="primary" disabled={!confirmed} onClick={onDone}>
+          <Button variant="cta" disabled={!confirmed} onClick={onDone}>
             Done
           </Button>
         </div>
@@ -773,54 +785,83 @@ console.log(response.choices[0].message.tool_calls);`,
   }
 
   return (
-    <div className="max-w-[600px] mx-auto py-[20px]">
-      <div className="bg-white rounded-[12px] card-shadow p-[28px]">
-        <h2 className="text-[18px] font-semibold text-[#243342] mb-[4px]">Create API key</h2>
-        <p className="text-[13px] text-[#687a8b] mb-[24px]">API keys authenticate your requests to the AI Gateway endpoint.</p>
+    <div className="max-w-[960px] mx-auto py-[20px]">
+      <div className="mb-[28px]">
+        <h1 className="text-[24px] font-semibold text-[#ff6b35] mb-[8px]">Create API key</h1>
+        <p className="text-[14px] text-[#687a8b] leading-[1.6] max-w-[560px]">
+          API keys authenticate your requests to the AI Gateway endpoint.
+        </p>
+      </div>
 
-        <div className="mb-[20px]">
-          <label className="block text-[13px] font-medium text-[#243342] mb-[6px]">
-            Key name <span className="text-[#ff6b35]">*</span>
-          </label>
-          <input
-            type="text"
-            value={keyName}
-            onChange={(e) => setKeyName(e.target.value)}
-            placeholder="e.g. Production App"
-            className="w-full h-[40px] px-[12px] text-[14px] text-[#243342] border border-[#e6e9ec] rounded-[8px] outline-none focus:border-[#1870c6] placeholder:text-[#9ba7b2]"
-          />
-        </div>
+      {/* Key details */}
+      <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[20px]">
+        <h2 className="text-[16px] font-semibold text-[#243342] mb-[20px]">Key details</h2>
+        <label className="block text-[13px] font-medium text-[#243342] mb-[6px]">
+          Key name <span className="text-[#ff6b35]">*</span>
+        </label>
+        <input
+          type="text"
+          value={keyName}
+          onChange={(e) => setKeyName(e.target.value)}
+          placeholder="e.g. Production App"
+          className="w-full h-[40px] px-[12px] text-[14px] text-[#243342] border border-[#e6e9ec] rounded-[8px] outline-none focus:border-[#1870c6] placeholder:text-[#9ba7b2]"
+        />
+      </div>
 
-        <div className="mb-[24px]">
-          <label className="block text-[13px] font-medium text-[#243342] mb-[6px]">
-            Monthly budget <span className="text-[12px] font-normal text-[#9ba7b2]">(optional)</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[14px] text-[#9ba7b2]">$</span>
-            <input
-              type="text"
-              value={keyBudget}
-              onChange={(e) => setKeyBudget(e.target.value)}
-              placeholder="500"
-              className="w-full h-[40px] pl-[28px] pr-[12px] text-[14px] text-[#243342] border border-[#e6e9ec] rounded-[8px] outline-none focus:border-[#1870c6] placeholder:text-[#9ba7b2]"
-            />
+      {/* Monthly spend limit */}
+      <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[20px]">
+        <div className="flex items-start justify-between mb-[4px]">
+          <div>
+            <h2 className="text-[16px] font-semibold text-[#243342]">Monthly spend limit</h2>
+            <p className="text-[13px] text-[#687a8b] mt-[4px]">Traffic for this key will pause automatically when the monthly limit is reached.</p>
           </div>
-          <p className="text-[12px] text-[#9ba7b2] mt-[6px]">Traffic will pause when this limit is reached</p>
+          <button
+            type="button"
+            onClick={() => setBudgetEnabled(!budgetEnabled)}
+            style={{ background: budgetEnabled ? '#1870c6' : '#c4cdd5' }}
+            className="relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 focus:outline-none"
+          >
+            <span
+              style={{ left: budgetEnabled ? '23px' : '3px' }}
+              className="absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-all duration-200"
+            />
+          </button>
         </div>
+        {budgetEnabled && (
+          <div className="mt-[16px] pt-[16px] border-t border-[#f3f4f5]">
+            <label className="block text-[13px] font-medium text-[#243342] mb-[6px]">
+              Budget (USD / month)
+            </label>
+            <div className="relative">
+              <span className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[14px] text-[#9ba7b2]">$</span>
+              <input
+                type="text"
+                value={keyBudget}
+                onChange={(e) => setKeyBudget(e.target.value)}
+                placeholder="500"
+                className="w-full h-[40px] pl-[28px] pr-[12px] text-[14px] text-[#243342] border border-[#e6e9ec] rounded-[8px] outline-none focus:border-[#1870c6] placeholder:text-[#9ba7b2]"
+              />
+            </div>
+            <p className="text-[12px] text-[#9ba7b2] mt-[6px]">Traffic will pause once this amount is reached</p>
+          </div>
+        )}
+      </div>
 
-        <div className="mb-[24px] flex items-start justify-between p-[16px] bg-[#fafbfc] border border-[#e6e9ec] rounded-[10px]">
+      {/* EU-only routing */}
+      <div className="bg-white rounded-[12px] card-shadow p-[24px] mb-[24px]">
+        <div className="flex items-start justify-between">
           <div className="flex items-start gap-[10px]">
-            <span className="text-[16px] mt-[1px]">🇪🇺</span>
+            <span className="text-[18px] mt-[1px]">🇪🇺</span>
             <div>
-              <p className="text-[13px] font-medium text-[#243342]">EU-only routing</p>
-              <p className="text-[12px] text-[#687a8b] mt-[2px]">Route all requests through European infrastructure only. Ensures GDPR-compliant data processing.</p>
+              <h2 className="text-[16px] font-semibold text-[#243342]">EU-only routing</h2>
+              <p className="text-[13px] text-[#687a8b] mt-[4px] max-w-[500px]">Route all requests through European infrastructure only. Ensures GDPR-compliant data processing.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setEuOnly(!euOnly)}
             style={{ background: euOnly ? '#1870c6' : '#c4cdd5' }}
-            className="relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 focus:outline-none ml-[12px] mt-[2px]"
+            className="relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 focus:outline-none"
           >
             <span
               style={{ left: euOnly ? '23px' : '3px' }}
@@ -828,15 +869,15 @@ console.log(response.choices[0].message.tool_calls);`,
             />
           </button>
         </div>
+      </div>
 
-        <div className="flex items-center gap-[10px]">
-          <Button variant="cta" disabled={!keyName.trim()} onClick={handleCreate}>
-            Create key
-          </Button>
-          <Button variant="outline" onClick={onDone}>
-            Cancel
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-[12px]">
+        <Button variant="outline" onClick={onDone}>
+          Cancel
+        </Button>
+        <Button variant="cta" disabled={!keyName.trim()} onClick={handleCreate}>
+          Create key
+        </Button>
       </div>
     </div>
   );
