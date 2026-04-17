@@ -174,7 +174,7 @@ export default function ModelsSection() {
                 </td>
                 <td className="px-[20px] py-[11px] text-[13px] text-[#243342] text-right font-medium">{fmt(m.inputPer1M)}</td>
                 <td className="px-[20px] py-[11px] text-[13px] text-right">
-                  <span className={m.cachedInputPer1M === null ? 'text-[#9ba7b2]' : 'text-[#16a34a] font-medium'}>
+                  <span className={m.cachedInputPer1M === null ? 'text-[#9ba7b2]' : 'text-[#243342] font-medium'}>
                     {fmt(m.cachedInputPer1M)}
                   </span>
                 </td>
