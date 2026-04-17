@@ -136,7 +136,6 @@ function MiniChart({ title, subtitle, value, change, up, data, labels, color, fo
 function OverviewV2({ onCreateKey, onGoToKeys, onGoToUsage }: { onCreateKey: () => void; onGoToKeys: () => void; onGoToUsage: () => void }) {
   const [snippetTab, setSnippetTab] = useState<'curl' | 'python' | 'node'>('curl');
   const [snippetCopied, setSnippetCopied] = useState(false);
-  const [endpointCopied, setEndpointCopied] = useState(false);
 
   const activeKeys = mockKeys.filter(k => k.status === 'active');
   const totalRequests = '2.87M';
@@ -163,12 +162,6 @@ function OverviewV2({ onCreateKey, onGoToKeys, onGoToUsage }: { onCreateKey: () 
     setTimeout(() => setSnippetCopied(false), 2000);
   };
 
-  const handleCopyEndpoint = () => {
-    navigator.clipboard.writeText(ENDPOINT).catch(() => {});
-    setEndpointCopied(true);
-    setTimeout(() => setEndpointCopied(false), 2000);
-  };
-
   return (
     <>
       {/* Hero card: Get started + code snippet */}
@@ -183,9 +176,6 @@ function OverviewV2({ onCreateKey, onGoToKeys, onGoToUsage }: { onCreateKey: () 
             <div className="flex items-center gap-[10px]">
               <Button variant="cta" icon="fas fa-plus" onClick={onCreateKey}>
                 Create an API Key
-              </Button>
-              <Button variant="outline" onClick={handleCopyEndpoint}>
-                {endpointCopied ? 'Copied!' : 'Copy Endpoint'}
               </Button>
             </div>
           </div>
