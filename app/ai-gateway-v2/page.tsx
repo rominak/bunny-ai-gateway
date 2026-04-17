@@ -655,15 +655,14 @@ console.log(response.choices[0].message.tool_calls);`,
               <h2 className="text-[16px] font-semibold text-[#243342]">API key</h2>
               <p className="text-[13px] text-[#687a8b] mt-[4px]">Store this somewhere secure — password manager, env variable, or secrets vault.</p>
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              icon={copied ? 'fas fa-check' : 'fas fa-copy'}
               onClick={handleCopy}
-              className={`flex items-center gap-[6px] h-[32px] px-[12px] rounded-[6px] text-[12px] font-medium transition-colors flex-shrink-0 ${
-                copied ? 'bg-[#f0fdf4] text-[#16a34a] border border-[#86efac]' : 'bg-[#eef4fe] text-[#1870c6] border border-[#eef4fe] hover:bg-[#dbeafe]'
-              }`}
             >
-              <FaIcon icon={copied ? 'fas fa-check' : 'fas fa-copy'} className="text-[11px]" ariaLabel="Copy" />
               {copied ? 'Copied' : 'Copy'}
-            </button>
+            </Button>
           </div>
 
           <div className="relative">
@@ -681,13 +680,14 @@ console.log(response.choices[0].message.tool_calls);`,
               <span className="text-[12px] text-[#687a8b]">
                 Paste into your <code className="text-[12px] font-mono text-[#243342] bg-[#f3f4f5] px-[6px] py-[2px] rounded-[4px]">.env</code> file
               </span>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
+                icon="fas fa-copy"
                 onClick={() => { navigator.clipboard.writeText(`BUNNY_AI_KEY=${revealedKey}`).catch(() => {}); }}
-                className="flex items-center gap-[6px] h-[32px] px-[12px] rounded-[6px] text-[12px] font-medium transition-colors flex-shrink-0 bg-[#eef4fe] text-[#1870c6] border border-[#eef4fe] hover:bg-[#dbeafe]"
               >
-                <FaIcon icon="fas fa-copy" className="text-[11px]" ariaLabel="Copy" />
                 Copy
-              </button>
+              </Button>
             </div>
             <input
               type="text"
