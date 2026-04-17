@@ -639,16 +639,12 @@ console.log(response.choices[0].message.tool_calls);`,
 
     return (
       <div className="max-w-[960px] mx-auto py-[20px]">
-        {/* Header */}
-        <div className="mb-[28px]">
-          <div className="flex items-center gap-[10px] mb-[8px]">
-            <div className="w-[32px] h-[32px] rounded-full bg-[#f0fdf4] flex items-center justify-center">
-              <FaIcon icon="fas fa-check" className="text-[13px] text-[#16a34a]" ariaLabel="Success" />
-            </div>
-            <h1 className="text-[24px] font-semibold text-[#243342]">Your API key is ready</h1>
-          </div>
-          <p className="text-[14px] text-[#687a8b] leading-[1.6] max-w-[620px]">
-            Key created for <span className="font-medium text-[#243342]">{keyName}</span>. Copy it now — for security reasons, it won't be shown again.
+        {/* Success alert */}
+        <div className="bg-[#f2faf5] border border-[#c8ead6] rounded-[8px] px-[15px] py-[10px] mb-[20px] flex items-center gap-[10px]">
+          <FaIcon icon="fas fa-circle-check" className="text-[12px] text-[#2fc584] flex-shrink-0" ariaLabel="Success" />
+          <p className="text-[14px] leading-[18px] text-[#243342]">
+            <span className="font-semibold">API key was successfully created</span>{' '}
+            Your API key <span className="font-medium">{keyName}</span> has been successfully created and is ready for use.
           </p>
         </div>
 
