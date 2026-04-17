@@ -565,12 +565,12 @@ export default function UsageSection() {
       {/* Filters row */}
       <div className="flex items-center justify-end gap-[10px] mb-[20px]">
         <KeyFilterDropdown value={keyFilter} onChange={setKeyFilter} />
-        <div className="flex items-center gap-[4px] bg-white rounded-[8px] card-shadow p-[4px]">
+        <div className="flex items-center gap-[4px] h-[34px] bg-white rounded-[8px] card-shadow p-[3px]">
           {timeRanges.map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`px-[12px] py-[6px] rounded-[6px] text-[12px] font-medium transition-colors ${
+              className={`h-full px-[12px] rounded-[6px] text-[12px] font-medium transition-colors ${
                 range === r ? 'bg-[#243342] text-white' : 'text-[#687a8b] hover:bg-[#f3f4f5]'
               }`}
             >
